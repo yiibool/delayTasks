@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "classmap": [
+            "./DelayTask"
+        ]
+    },
+    "require": {
+        "monolog/monolog": "^1.25",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-bcmath": "*"
+    }
+}
