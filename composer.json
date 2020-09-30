@@ -8,6 +8,11 @@
         "monolog/monolog": "^1.25",
         "ext-json": "*",
         "ext-curl": "*",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "yiibool/dt-protocol": "dev-master"
+    },
+    "minimum-stability": "dev",
+    "config": {
+        "secure-http": true
     }
 }

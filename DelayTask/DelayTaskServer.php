@@ -66,7 +66,7 @@ class DelayTaskServer
         unset($reactorId);
         try {
             $decodeData = DTProtocol::decode($data);
-            $res = $this->call($decodeData['body'], $decodeData['header']['reqid']);
+            $res = $this->call(json_decode($decodeData['body'], true), $decodeData['header']['reqid']);
             return $server->send($fd, DTProtocol::encode([
                 'code'      => $res['code'],
                 'message'   => $res['message'],

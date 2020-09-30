@@ -27,6 +27,8 @@ $messageBody = DTProtocol::encode([
         ]
     ]
 ]);
+// var_dump($messageBody, DTProtocol::decode($messageBody));
+// $client->close();exit();
 
 $client->send($messageBody);
 $res = $client->recv();

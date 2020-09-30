@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace DelayTask\Lib;
 
-use DelayTask\Exception\ProtocolException;
+use DTProtocol\Exception\ProtocolException;
+use DTProtocol\Packet;
 
 /**
  * DT数据协议
@@ -14,14 +15,9 @@ class DTProtocol
 {
 
     /**
-     * 打包格式
+     * @var Packet
      */
-    const PACK_FORMAT = 'NN';
-
-    /**
-     * 解包格式
-     */
-    const HEADER_STRUCT = 'Nlength/Nreqid';
+    protected static $packet;
 
     /**
      * 消息打包
@@ -32,8 +28,11 @@ class DTProtocol
     public static function encode($data, $requestId = 0)
     {
         $requestId = $requestId ?: dk_get_next_id();
-        $encodeData = json_encode($data);
-        return pack(self::PACK_FORMAT, strlen($encodeData), $requestId) . $encodeData;
+        if (empty(self::$packet)) {
+            self::$packet = new Packet();
+        }
+
+        return self::$packet->encode(json_encode($data), $requestId);
     }
 
     /**
@@ -44,24 +43,13 @@ class DTProtocol
      */
     public static function decode($data)
     {
-        if (strlen($data) > Config::get('server.settings.package_max_length')) {
-            throw new ProtocolException(ProtocolException::CODE_PACKAGE_TOO_LARGE);
+        if (empty(self::$packet)) {
+            self::$packet = new Packet();
         }
 
-        $header = substr($data, Config::get('server.settings.package_length_offset'), Config::get('server.settings.package_body_offset'));
-        $body = substr($data, Config::get('server.settings.package_body_offset'));
-        $decodeRes = unpack(self::HEADER_STRUCT, $header);
-        if ($decodeRes === false) {
-            throw new ProtocolException(ProtocolException::CODE_PACKAGE_DECODE_FAILED);
-        }
-
-        if ($decodeRes['length'] - Config::get('server.settings.package_body_offset') > Config::get('server.settings.package_max_length')) {
-            throw new ProtocolException(ProtocolException::CODE_PACKAGE_TOO_LARGE);
-        }
-
-        return [
-            'header'    => $decodeRes,
-            'body'      => json_decode($body, true),
-        ];
+        self::$packet->set('package_max_length', Config::get('server.settings.package_max_length'));
+        self::$packet->set('package_length_offset', Config::get('server.settings.package_length_offset'));
+        self::$packet->set('package_body_offset', Config::get('server.settings.package_body_offset'));
+        return self::$packet->decode($data);
     }
 }
